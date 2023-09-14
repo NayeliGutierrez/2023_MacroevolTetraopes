@@ -1,6 +1,7 @@
 # 2023_MacroevolTetraopes
 
-Custom scripts employed for the analysis of the Macroevolution of Milkweed longhorn Beetles Project.
+Custom scripts were employed for the analysis of the Macroevolution of Milkweed Longhorn Beetles Project.
+
 We did not develop new software for this study; hence, we offer the scripts for conducting analyses and provide references to other sources utilized.
 
 ## Index
