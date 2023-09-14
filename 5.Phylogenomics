@@ -1,5 +1,5 @@
 ```
-### Maximum likelihood
+### MAXIMUM LIKELIHOOD ###
 # Run [raxml NG](https://github.com/amkozlov/raxml-ng/wiki/Tutorial) searches, and reconcile best tree w/ bootraps
 
 # Check that the MSA can actually be read 
@@ -18,7 +18,7 @@ raxml-ng --bsconverge --bs-trees T1.raxml.bootstraps --prefix T2 --seed 2 --thre
 # Mapping the BS support values onto the best-scoring/best-known ML tree
 raxml-ng --support --tree T1.raxml.bestTree --bs-trees T1.raxml.bootstraps --prefix T3 --threads 30
 
-### Coalescence
+### COALESCENCE ###
 [astral github](https://github.com/smirarab/ASTRAL/blob/master/astral-tutorial.md),  [paper](https://academic.oup.com/bioinformatics/article/30/17/i541/200803)
 [super nice tutorial](https://github.com/jasonleebrown/UCE_phyluce_pipeline/blob/master/README.md#removing-individuals-from-alignments)
 [another one](https://plewis.github.io/phylogenetics2022/)
@@ -35,7 +35,7 @@ java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_tree
 # With all annotations t 10
 java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_trees.newick -t 2 -o astral_sptree-t2.tre 2> astral-t2.log
 
-### Bayesian inference
+### BAYESIAN INFERENCE ###
 [ExaBayes](https://cme.h-its.org/exelixis/web/software/exabayes/) which is 'particularly suitable for large-scale analyses on computer clusters'. 
 [Manual](https://cme.h-its.org/exelixis/web/software/exabayes/manual/index.html), [google group](https://groups.google.com/g/exabayes)
 
