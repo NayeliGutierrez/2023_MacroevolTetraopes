@@ -1,0 +1,48 @@
+# Prepare data to run phyluce
+# Create a directory for each genome
+mkdir Tannulatus/ Tdiscoideus/ Tfemoratus/ Tpilosus/ Tskillmani/ Ttetraop/ Rlineati/ 
+# To change name from Tannulatus_scaffolds.fasta to Tannulatus.fasta
+for f in *.fasta; do
+    mv -- "$f" "${f%_scaffolds.fasta}.fasta"
+done
+# Convert files to 2bit format using faToTwoBit, which will remove everything following the first space in the header line (from tutorial).
+faToTwoBit Ttetraop.fasta Ttetraop.2bit
+twoBitInfo Ttetraop.2bit sizes.tab
+# Do the same for each file
+
+# Get the UCE probes: Coleoptera 1.1Kv1 set found in https://www.ultraconserved.org.
+wget https://ndownloader.figshare.com/files/6042081
+# Could not downloaded like that so I saved it on my computed and scp'ed to cuvier.
+  
+# Align the probes to the genomes
+phyluce_probe_run_multiple_lastzs_sqlite \
+    --db tutorial3.sqlite \
+    --output tetraopes-genome-lastz \
+    --scaffoldlist Ttetraop Rlineati Tdiscoideus Tannulatus Tskillmani Tfemoratus Tpilosus\
+    --genome-base-path ./ \
+    --probefile Coleoptera-UCE-1.1K-v1.fasta \
+    --cores 12
+# For Tetraopini
+phyluce_probe_run_multiple_lastzs_sqlite \
+    --db tutorial3.sqlite \
+    --output tetraopes-genome-lastz \
+    --scaffoldlist abiplagiata adimidiataa bfortunei eflava htestator phaeaa phaeab phaeac phaead phaeae pmaryannae pmaxima rlineati tannulatus tbasalis tbatesi tcleroides tcrinitus tdiscoideus telegans tetropsa tetropsb tetropssp tfemoratus tineditus tlinsleyi tmandibularis tmankinsi tmelanurus tparacomes tpilosus tpraestrus tquinquemaculatus tsimulator tskillmani tstarkii tsubfaciatus tsublaevis ttetraop ttexanus tthermophilus tumbonatus tvaricornis\
+    --genome-base-path ./ \
+    --probefile lamiinaeprobes.fasta \
+    --cores 14
+
+# Extract FASTA sequence matching UCE loci from genome sequences
+phyluce_probe_slice_sequence_from_genomes \
+    --lastz /home/ngutierrez/array1/UCEfromGenomes/assembled_genomes_run/tetraopes-genome-lastz \
+    --conf genomes.conf \
+    --flank 500 \
+    --name-pattern "Coleoptera-UCE-1.1K-v1.fasta_v_{}.lastz.clean" \
+    --output tetraopes-genome-fasta
+
+# For Tetraopini
+phyluce_probe_slice_sequence_from_genomes \
+    --lastz /home/ngutierrez/nas4/Tetraopini/uce-genome/genomes/tetraopes-genome-lastz \
+    --conf genomes.conf \
+    --flank 500 \
+    --name-pattern "lamiinaeprobes.fasta_v_{}.lastz.clean" \
+    --output tetraopes-genome-fasta
