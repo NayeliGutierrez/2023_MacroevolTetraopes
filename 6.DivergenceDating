@@ -1,16 +1,5 @@
 
-# Divergence dating in MCMCTREE 
-
-References:
-[Dos Reis blog to prepare input files](https://dosreislab.github.io/2021/03/29/mcmctree-help.html), 
-[MCMCtreeR](https://github.com/PuttickMacroevolution/MCMCtreeR), 
-[mcmctree manual](http://abacus.gene.ucl.ac.uk/software/MCMCtree.Tutorials.pdf), 
-[Estimating the marginal likelihood of a relaxed-clock model with MCMCTree](https://dosreislab.github.io/2017/10/24/marginal-likelihood-mcmc3r.html), 
-[book chapter](https://link.springer.com/protocol/10.1007/978-1-4939-9074-0_10),
-[paml manual](http://abacus.gene.ucl.ac.uk/software/pamlDOC.pdf).
-
-# Preparing the data
-```
+### Preparing the data
 # Alignment of the 300 most complete loci, generate an incomplete matrix in pyluche
 phyluce_align_get_only_loci_with_min_taxa \
     --alignments mafft-gblocks-clean \
@@ -45,12 +34,9 @@ python /home/ngutierrez/array1/software/PFinderUCE-SWSC-EN-master/py_script/SWSC
 python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/GTR+I+G --raxml -p 80 --rcluster-max 1000 --rcluster-percent 10
 # Then, as indicated in the post I used the 33 partitions to run another PF with these modification: search = greedy;
 python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/greedy --raxml -p 80
-```
 
-# MCMCTREE
 
-```
-# MCMCTREE
+### MCMCTREE
 # Calibrations distributions in MCMCtreeR
 setwd("/Users/nayeligutierrez/Downloads")
 apeTree <- ape::read.tree("astral_nobranchlen.nwk") 
@@ -160,7 +146,3 @@ for(i in 9:1) {
   plot(dpr, main=paste("t_n",i+10,sep=""), xlab="", ylab="", las=1, xlim=xl, ylim=yl, col="darkgrey")
   lines(dPr, col="black")
 }
-
-
-
-```
