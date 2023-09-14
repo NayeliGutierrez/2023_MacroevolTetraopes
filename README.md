@@ -84,15 +84,11 @@ spades.py -k 21,33,55,77,99,127 --pe1-1  /home3/mvandam/Xerces/clean/EL10_CKDL21
 
 spades.py -k 21,33,55,77,99,127 --pe1-1  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_1.fq.gz  --pe1-2  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_2.fq.gz  --pe1-s  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_unpaired.fq.gz  -o  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_spades_vanilla  -m 700 -t 36
 
-```
-
-### Assembly evaluation with QUAST
-
-```
+# Assembly evaluation with QUAST
 for f in *.fasta; do quast --eukaryote "$f" -o "$f".quast; done
 
 ```
-## 
+## UCE capture with novel probes
 
 ```
 # Phyluce 1.7.1
