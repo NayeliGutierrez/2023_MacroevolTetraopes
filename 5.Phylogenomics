@@ -1,0 +1,136 @@
+```
+### Maximum likelihood
+# Run [raxml NG](https://github.com/amkozlov/raxml-ng/wiki/Tutorial) searches, and reconcile best tree w/ bootraps
+
+# Check that the MSA can actually be read 
+raxml-ng --check --msa prim.phy --model GTR+G --prefix T1
+
+# For large alignments, we also recommend using --parse command
+raxml-ng --parse --msa prim.phy --model GTR+G --prefix T2
+
+# Raxml
+raxml-ng --all --msa prim.phy --prefix T1 --threads 60 --model prim.part --tree pars{10} --bs-trees 200 -log verbose 
+
+# Bootstrap convergence can also be checked post-hoc using the --bsconverge command, we can also change the cutoff value to make the test more or less stringent:
+# From manual: On large datasets the default cutoff value of 3% should be sufficient in most cases
+raxml-ng --bsconverge --bs-trees T1.raxml.bootstraps --prefix T2 --seed 2 --threads 30 --bs-cutoff 0.03
+  
+# Mapping the BS support values onto the best-scoring/best-known ML tree
+raxml-ng --support --tree T1.raxml.bestTree --bs-trees T1.raxml.bootstraps --prefix T3 --threads 30
+
+### Coalescence
+[astral github](https://github.com/smirarab/ASTRAL/blob/master/astral-tutorial.md),  [paper](https://academic.oup.com/bioinformatics/article/30/17/i541/200803)
+[super nice tutorial](https://github.com/jasonleebrown/UCE_phyluce_pipeline/blob/master/README.md#removing-individuals-from-alignments)
+[another one](https://plewis.github.io/phylogenetics2022/)
+[SOWH topology test paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5867853/), [github paaper](https://github.com/esayyari/polytomytest),  
+[github sowhat](https://github.com/josephryan/SOWHAT)
+
+# Constructing gene trees with IQ-TREE for ASTRAL input
+for i in *.nexus; do iqtree -s $i -bb 1000 -m GTR+G -nt AUTO -czb -redo; done
+
+# Astral.5.7.8
+java -jar  /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar -i gene_trees.newick -o astral_sptree.treefile
+# With Quartet support -t 1
+java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_trees.newick -t 1 -o astral_sptree-t1.tre 2> astral-t1.log
+# With all annotations t 10
+java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_trees.newick -t 2 -o astral_sptree-t2.tre 2> astral-t2.log
+
+### Bayesian inference
+[ExaBayes](https://cme.h-its.org/exelixis/web/software/exabayes/) which is 'particularly suitable for large-scale analyses on computer clusters'. 
+[Manual](https://cme.h-its.org/exelixis/web/software/exabayes/manual/index.html), [google group](https://groups.google.com/g/exabayes)
+
+# Filtering by parsimony-informative sites
+# Script to count parsimony informative sites and output to csv
+library(phyloch)
+# Setwd where the reads are
+setwd("/home/ngutierrez/array1/Tetraopini/tutorial4_allspp/taxon-sets/no-htesta/mafft-gblocks-50p")
+# Get list of file names and number of files
+listoffiles <- list.files(pattern="*.nex*")
+nooffiles <- length(listoffiles)
+# These are the column names
+record <- c("locusname","pis","length")
+# Loop to calculate PIS and write the PIS info to a text file
+for (j in 1:nooffiles) {
+  write.table((gsub("?","N",(readLines(listoffiles[j])),fixed=TRUE)),"list_of_pis_by_locus.txt",sep="",quote=FALSE,row.names=FALSE,col.names=FALSE)
+  tempfile <- read.nex("list_of_pis_by_locus.txt")
+  templength <- dim(tempfile)[2]
+  temppis <- pis(tempfile)
+  temp <- cbind(listoffiles[j],temppis,templength)
+  record <- rbind(record,temp)
+}
+# Add column names to text file
+write.table(record, "list_of_pis_by_locus.txt",quote=FALSE, row.names=FALSE,col.names=FALSE)
+# Calculate summary data and visualize PIS variables
+par_data <- as.data.frame(read.table("list_of_pis_by_locus.txt", header = TRUE))
+png(filename="name.png")
+plot(par_data$pis)
+# Calculate summary data and visualize PIS variables
+par_data <- as.data.frame(read.table("list_of_pis_by_locus.txt", header = TRUE))
+inform <- subset(par_data, pis >= 80) #subset data set for loci with PIS > 3
+inform <- subset(inform, pis < 150) #remove outliers (change based on obvious outliers to data set)
+png(filename="filter80-150.png")
+plot(inform$pis) #visualize informative loci
+inform_names <- inform$locusname #get locus names of informative loci for locus filtering
+# Write locus names to a file
+write.table(inform_names, file = "inform_names_PIS_80-150.txt",quote=FALSE, row.names=FALSE,col.names=FALSE)
+# Extract filtered loci
+mkdir pars-inf-loci80-150
+cd mafft-gblocks-50p
+for n in $(cat inform_names_PIS_80-150.txt); \
+   do cp "$n" ../pars-inf-loci80-150; \
+done
+# Concatenate alignments
+phyluce_align_concatenate_alignments \
+    --alignments pars-inf-loci80-150 \
+    --output pars-inf-loci80-150-phyl \
+    --log-path log --phylip
+phyluce_align_concatenate_alignments \
+    --alignments pars-inf-loci80-150 \
+    --output pars-inf-loci80-150-nex \
+    --log-path log --nexus
+
+# ExaBayes-1.5.1
+# config file
+#NEXUS
+begin run;
+numruns 2
+numCoupledChains 2
+numgen 5e6
+numswapspergen 1
+parsimonyStart  true
+checkPointInterval 1e6
+printFreq 1e6
+proposalSets true
+end;
+
+# Parallelization
+select=2:ncpus=64:mpiprocs=64:mem=260gb
+
+# Checks your config and alignment file and does not compute anything
+exabayes -d -f prim.phy -m DNA -c config.nex -n check -s 3
+mpirun -np 64 exabayes -f prim.phy -m DNA -q prim.part -n myRun -s $RANDOM -c config.nex -R 2 -C 2 -w /home/ngutierrez/nas4/Tetraopini/exabayes/parsimony-informative-sites/158partitions
+
+begin run;
+numruns 2
+numCoupledChains 2
+numgens 1e5
+params
+brlens = (0-157)
+numswapspergen 1
+parsimonyStart  true
+proposalSets true
+end;
+      
+# Get various statistics for sampled parameters
+postProcParam -f ExaBayes_parameters.run-1.myRun ExaBayes_parameters.run-0.myRun ExaBayes_parameters.run-1.myRunContinued ExaBayes_parameters.run-0.myRunContinued -n param
+
+# Compute the avgerage and maximum deviation of split frequencies of sets of trees.
+sdsf -f ExaBayes_topologies.run-1.myRun ExaBayes_topologies.run-0.myRun ExaBayes_topologies.run-1.myRunContinued ExaBayes_topologies.run-0.myRunContinued
+
+# Extract a credible set of trees from a tree set
+credibleSet -n credible-set -f ExaBayes_topologies.run-1.myRun ExaBayes_topologies.run-0.myRun ExaBayes_topologies.run-1.myRunContinued ExaBayes_topologies.run-0.myRunContinued
+
+# Consense
+consense -n consense-set -f ExaBayes_topologies.run-1.myRun ExaBayes_topologies.run-0.myRun ExaBayes_topologies.run-1.myRunContinued ExaBayes_topologies.run-0.myRunContinued
+
+```
