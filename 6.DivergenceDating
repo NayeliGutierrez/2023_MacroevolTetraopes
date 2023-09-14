@@ -1,0 +1,166 @@
+
+# Divergence dating in MCMCTREE 
+
+References:
+[Dos Reis blog to prepare input files](https://dosreislab.github.io/2021/03/29/mcmctree-help.html), 
+[MCMCtreeR](https://github.com/PuttickMacroevolution/MCMCtreeR), 
+[mcmctree manual](http://abacus.gene.ucl.ac.uk/software/MCMCtree.Tutorials.pdf), 
+[Estimating the marginal likelihood of a relaxed-clock model with MCMCTree](https://dosreislab.github.io/2017/10/24/marginal-likelihood-mcmc3r.html), 
+[book chapter](https://link.springer.com/protocol/10.1007/978-1-4939-9074-0_10),
+[paml manual](http://abacus.gene.ucl.ac.uk/software/pamlDOC.pdf).
+
+# Preparing the data
+```
+# Alignment of the 300 most complete loci, generate an incomplete matrix in pyluche
+phyluce_align_get_only_loci_with_min_taxa \
+    --alignments mafft-gblocks-clean \
+    --taxa 39 \
+    --output mafft-gblocks-94p \
+    --percent 0.94 \
+    --cores 40 \
+    --log log
+
+# extract 300 loci
+ls mafft-gblocks-94p/ > names.txt
+shuf -n300 names.txt > random_loci_n300.txt
+for i in $(cat random_loci_n300.txt); \
+	do cp mafft-gblocks-94p/$i mafft-gblocks-94p-n300/; \
+done
+
+# concatenate into a sinlge alignment
+phyluce_align_concatenate_alignments \
+	--alignments mafft-gblocks-94p-n300 \
+	--output mafft-gblocks-94p-n300/random-300-alignment \
+	--nexus
+phyluce_align_concatenate_alignments \
+	--alignments mafft-gblocks-94p-n300 \
+	--output random-300-alignments-phylip \
+	--phylip
+
+# Partition finder
+# Prepartition
+cat alignm.nexus | sed 's/uce-/uce_/g' > alignm.nexus.nexus
+python /home/ngutierrez/array1/software/PFinderUCE-SWSC-EN-master/py_script/SWSCEN.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/pre-part/alignm.nexus.nexus
+# Partition finder
+python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/GTR+I+G --raxml -p 80 --rcluster-max 1000 --rcluster-percent 10
+# Then, as indicated in the post I used the 33 partitions to run another PF with these modification: search = greedy;
+python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/greedy --raxml -p 80
+```
+
+# MCMCTREE
+
+```
+# MCMCTREE
+# Calibrations distributions in MCMCtreeR
+setwd("/Users/nayeligutierrez/Downloads")
+apeTree <- ape::read.tree("astral_nobranchlen.nwk") 
+plot(apeTree, node.width = 0.8)
+nodelabels()
+tipDes(apeTree, 40)
+
+# For Tetrops fossil (node 43) and Lamiinae (node 40)
+monophyleticGroups <- tipDes(apeTree, c(43, 40))
+monophyleticGroups
+minimumTimes <- c("node43"=23,"node40"=59.2)
+names(minimumTimes)
+maximumTimes <- c("node43"=24.2, "node40"=124.0) # Lamiinae max age from Nie etal pag4
+names(maximumTimes)
+
+# Uniform distribution for Tetrops fossil and skew normal for Lamiinae
+uniform_results_nodeOne <- estimateBound(minAge = minimumTimes[1], 
+                                         maxAge = maximumTimes[1], monoGroups = monophyleticGroups[[1]], 
+                                         phy = apeTree, plot = TRUE, writeMCMCtree = FALSE)
+uniform_results_nodeOne$apePhy
+uniform_results_nodeTwo <- estimateBound(minAge = minimumTimes[2], 
+                                         maxAge = maximumTimes[2], monoGroups = monophyleticGroups[[2]], 
+                                         phy = uniform_results_nodeOne$apePhy, plot = TRUE, 
+                                         writeMCMCtree = FALSE)
+uniform_results_nodeTwo$apePhy
+
+# Parameters and tree
+uniform_results_nodeOne$parameters
+uniform_results_nodeTwo$parameters
+uniform_results_nodeTwo$MCMCtree
+
+# Estimate of the substitution rate
+baseml baseml.ctl
+
+# Estimation of branch lengths, gradient and Hessian     
+mcmctree mcmctree.ctl
+# Estimation of divergence times using the gradient and Hessian
+mv out.BV in.BV
+mcmctree mcmctree.ctl
+
+# Convergence Diagnostics, code from Bayesian Molecular Clock Dating Using Genome-Scale Datasets book's tutorial 
+rm(list=ls()) # clean up the workspace
+setwd("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics")
+# Posterior
+# Read in MCMC trace files
+mcmc1 <- read.table("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/mcmc/mcmc1.txt", head=TRUE)
+mcmc2 <- read.table("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/mcmc/mcmc2.txt", head=TRUE)
+# Each data frame contains 15 columns:
+# MCMC generation number, 9 node ages (divergence times), 2 mean mutation rates,
+# 2 rate drift coefficients, and sample log-likelihood values
+names(mcmc1)
+#[1] "Gen"    "t_n40"  "t_n41"  "t_n42"  "t_n43"  "t_n44"  "t_n45"  "t_n46"  "t_n47"  "t_n48"  "t_n49" 
+#[12] "t_n50"  "t_n51"  "t_n52"  "t_n53"  "t_n54"  "t_n55"  "t_n56"  "t_n57"  "t_n58"  "t_n59"  "t_n60" 
+#[23] "t_n61"  "t_n62"  "t_n63"  "t_n64"  "t_n65"  "t_n66"  "t_n67"  "t_n68"  "t_n69"  "t_n70"  "t_n71" 
+#[34] "t_n72"  "t_n73"  "t_n74"  "t_n75"  "t_n76"  "t_n77"  "mu"     "sigma2" "lnL"  
+
+# To check for convergence of the MCMC runs, we calculate the posterior
+# means of times for each run, and plot them against each other
+t.mean1 <- apply(mcmc1[,2:10], 2, mean) * 100
+t.mean2 <- apply(mcmc2[,2:10], 2, mean) * 100
+# Good convergence is indicated when the points fall on the y = x line.
+par(mfrow=c(2,2))
+# Posterior times for run 1 vs run 2:
+plot(t.mean1, t.mean2, main="a) Posterior times, r 1 vs. r 2"); abline(0, 1)
+# Notice that ancient times (t_n11 and t_n12) have small ESS
+# Trace plots are useful to visualise the MCMC and split problems
+plot(mcmc1$t_n43, ty='l', main="b) trace of t_n43")
+plot(mcmc2$t_n43, ty='l', main="c) trace of t_n43")
+plot(density(mcmc1$t_n43), main="d) histogram of t_n43, r 1 vs. r2")
+lines(density(mcmc2$t_n43), lty=2)
+
+# We can calculate the effective sample sizes (ESS) of the parameters
+mean.mcmc <- apply(mcmc1[,-1], 2, mean)
+ess.mcmc <- apply(mcmc1[,-1], 2, coda::effectiveSize)
+var.mcmc <- apply(mcmc1[,-1], 2, var)
+se.mcmc <- sqrt(var.mcmc / ess.mcmc)
+cbind(mean.mcmc, ess.mcmc, var.mcmc, se.mcmc)
+par(mfrow=c(1,1))
+#pri10s.tree <- ape::read.tree("../data/10s.tree") # does not work with some ape versions
+pri10s.tree <- ape::read.tree("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/tree.tre")
+bppr::mcmc2densitree(pri10s.tree, mcmc1 * 100, "t_", thin=0.05, col="blue", alpha=0.01, pfrac=0.2)
+title(xlab="Divergence time (Ma)")
+
+# Some phylogentic programs such as BEAST or MrBayes output a list of trees in 
+# Newick format, instead of a table. If you want, you can convert MCMCtree's
+# MCMC output into a list of Newick trees as with BEAST or MrBayes
+pri10s.tree$node.label <- NULL # remove node labels (optional)
+mcmc.trees <- bppr::mcmc2multiphylo(pri10s.tree, mcmc1, "t_", thin=0.05)
+# You can write the trees to a file (note this file can be potentially very big)
+ape::write.tree(mcmc.trees, file="many.tree")
+
+# Prior
+mcmc1.p <- read.table("../prior/mcmc1.txt", head=TRUE)
+mcmc2.p <- read.table("../prior/mcmc2.txt", head=TRUE)
+
+p.mean1 <- apply(mcmc1.p[,2:10], 2, mean) * 100
+p.mean2 <- apply(mcmc2.p[,2:10], 2, mean) * 100
+plot(p.mean1, p.mean2); abline(0, 1)
+
+# par(mai=c(.4,.5,.4,.2)) # this changes the margin sizes
+par(mfcol=c(3,3))
+for(i in 9:1) {
+  dpr <- density(mcmc1.p[,i+1], adj=.1) # prior
+  dPr <- density(mcmc1[,i+1], adj=.1)   # Posterior
+  xl <- range(c(dpr$x, dPr$x))
+  yl <- range(c(dpr$y, dPr$y))
+  plot(dpr, main=paste("t_n",i+10,sep=""), xlab="", ylab="", las=1, xlim=xl, ylim=yl, col="darkgrey")
+  lines(dPr, col="black")
+}
+
+
+
+```
