@@ -1,0 +1,32 @@
+```
+# Fastp 
+# Based on Matthew Van Dam's script
+
+# Create a clean dir for your clean reads to go
+dir.create("clean") #do once
+# Make list of file names and paste together commands for fastp as above example 
+f1 = list.files(getwd(), ".*_1.fq.gz", recursive=TRUE, full.names=TRUE)
+f2 = list.files(getwd(), ".*_2.fq.gz", recursive=TRUE, full.names=TRUE)
+f1=f1[-21] # this removes any files that may match, change number to remove right one if need be
+f2=f2[-21] # this removes any files that may match, change number to remove right one if need be
+
+# Need to match the regular expression of your file names e.g. /home/ngutierrez/array1/Tetraopini/0.untrimmed/Nayeli_Pool1_
+c1 = gsub("ed/", "ed/clean/", f1 )
+c2 = gsub("ed/", "ed/clean/", f2 )
+
+# Fastp
+c1u = gsub(".fq.gz", ".unpaired.fq.gz", c1)
+c2u = gsub(".fq.gz", ".unpaired.fq.gz", c2)
+htmlrep = gsub(".unpaired.fq.gz",".html",c1u)
+cmd = paste("fastp --in1 ", f1, " --in2 ", f2, " --out1 ", c1," --out2 ", c2, " --unpaired1 ", c1u, " --unpaired2 ", c2u, " --thread 16 --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT --html ", htmlrep, sep="") # --detect_adapter_for_pe
+mclapply(cmd, system, mc.cores=getOption("mc.cores", 4)) # do only once !!!!!!!!!!!!, this runs 16 threads X 4 = 64 total threads
+cat1 = c1u
+cat2 = c2u
+catted = sub("_1.unpaired.fq.gz", "_unpaired.fq.gz", c1u)
+cmd = paste("cat", cat1, cat2, ">>", catted)
+lapply(cmd, system) #run only once !!!!!!!!!!!
+
+# Not in R, remove all the unpaied r1 r2 files keeping only the catted ones
+find . -type f -name '*.unpaired.fq.gz' -exec rm {} \;
+
+```
