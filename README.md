@@ -17,6 +17,7 @@ For each section, we provide a folder with a Jupyter Notebook with a detailed ex
 
 ### Quality control
 
+```
 #### Fastp ####
 ### Script based on Matthew Van Dam's script
 
@@ -51,3 +52,5 @@ lapply(cmd, system) #run only once !!!!!!!!!!!
 ## not in R, remove all the unpaied r1 r2 files keeping only the catted ones
 ### you will want to check find . -type f -name '*.unpaired.fq.gz' before running the line below as this can delete many files be very careful, check to make sure you are in the correct directory
 #find . -type f -name '*.unpaired.fq.gz' -exec rm {} \;
+
+```
