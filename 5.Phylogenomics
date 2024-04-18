@@ -13,8 +13,9 @@ raxml-ng --parse --msa prim.phy --model GTR+G --prefix T2
 # Raxml
 raxml-ng --all --msa prim.phy --prefix T1 --threads 60 --model prim.part --tree pars{10} --bs-trees 200 -log verbose 
 
-# Bootstrap convergence can also be checked post-hoc using the --bsconverge command, we can also change the cutoff value to make the test more or less stringent:
-# From manual: On large datasets the default cutoff value of 3% should be sufficient in most cases
+# Form manual: "Bootstrap convergence can also be checked post-hoc using the 
+# --bsconverge command, we can also change the cutoff value to make the test more or less stringent:"
+# From manual: "On large datasets the default cutoff value of 3% should be sufficient in most cases"
 raxml-ng --bsconverge --bs-trees T1.raxml.bootstraps --prefix T2 --seed 2 --threads 30 --bs-cutoff 0.03
   
 # Mapping the BS support values onto the best-scoring/best-known ML tree
@@ -31,11 +32,11 @@ raxml-ng --support --tree T1.raxml.bestTree --bs-trees T1.raxml.bootstraps --pre
 for i in *.nexus; do iqtree -s $i -bb 1000 -m GTR+G -nt AUTO -czb -redo; done
 
 # Astral.5.7.8
-java -jar  /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar -i gene_trees.newick -o astral_sptree.treefile
+java -jar  astral.5.7.8.jar -i gene_trees.newick -o astral_sptree.treefile
 # With Quartet support -t 1
-java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_trees.newick -t 1 -o astral_sptree-t1.tre 2> astral-t1.log
+java -jar astral.5.7.8.jar  -i gene_trees.newick -t 1 -o astral_sptree-t1.tre 2> astral-t1.log
 # With all annotations t 10
-java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_trees.newick -t 2 -o astral_sptree-t2.tre 2> astral-t2.log
+java -jar astral.5.7.8.jar  -i gene_trees.newick -t 2 -o astral_sptree-t2.tre 2> astral-t2.log
 
 ### BAYESIAN INFERENCE ###
 [ExaBayes](https://cme.h-its.org/exelixis/web/software/exabayes/) which is 'particularly suitable for large-scale analyses on computer clusters'. 
@@ -60,7 +61,7 @@ select=2:ncpus=64:mpiprocs=64:mem=260gb
 
 # Checks your config and alignment file and does not compute anything
 exabayes -d -f prim.phy -m DNA -c config.nex -n check -s 3
-mpirun -np 64 exabayes -f prim.phy -m DNA -q prim.part -n myRun -s $RANDOM -c config.nex -R 2 -C 2 -w /home/ngutierrez/nas4/Tetraopini/exabayes/parsimony-informative-sites/158partitions
+mpirun -np 64 exabayes -f prim.phy -m DNA -q prim.part -n myRun -s $RANDOM -c config.nex -R 2 -C 2 -w parsimony-informative-sites
 
 begin run;
 numruns 2
@@ -76,7 +77,7 @@ end;
 # Get various statistics for sampled parameters
 postProcParam -f ExaBayes_parameters.run-1.myRun ExaBayes_parameters.run-0.myRun ExaBayes_parameters.run-1.myRunContinued ExaBayes_parameters.run-0.myRunContinued -n param
 
-# Compute the avgerage and maximum deviation of split frequencies of sets of trees.
+# Compute the average and maximum deviation of split frequencies of sets of trees.
 sdsf -f ExaBayes_topologies.run-1.myRun ExaBayes_topologies.run-0.myRun ExaBayes_topologies.run-1.myRunContinued ExaBayes_topologies.run-0.myRunContinued
 
 # Extract a credible set of trees from a tree set
