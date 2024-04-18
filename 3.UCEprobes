@@ -1,7 +1,11 @@
 # Phyluce 1.7.1
+
+# Code from Phyluce tutorial:
+# https://phyluce.readthedocs.io/en/latest/tutorials/
+
 # Count of matches that we recovered to UCE loci in the probe set, and extract all of the “good” loci to a monolithic FASTA 
 phyluce_assembly_get_match_counts \
-    --locus-db /home/ngutierrez/array1/Tetraopini/tutorial4_allspp/in-silico-lastz/probe.matches.sqlite \
+    --locus-db /in-silico-lastz/probe.matches.sqlite \
     --samples 39 \
     --taxon-list-config in-silico-coleoptera-taxon-sets.conf \
     --taxon-group 'nohtesta' \
@@ -58,8 +62,6 @@ phyluce_align_get_align_summary_data \
 
 # Get uce mean mength stats (taken from tutorial II)
 # Exploding the monolithic FASTA file
-cd /home/ngutierrez/array1/Tetraopini/tutorial4_allspp/taxon-sets/no-htesta
-
 # By taxon
 phyluce_assembly_explode_get_fastas_file \
     --input insilico-incomplete.fasta \
