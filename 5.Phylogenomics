@@ -41,56 +41,6 @@ java -jar /home/ngutierrez/array1/software/Astral/astral.5.7.8.jar  -i gene_tree
 [ExaBayes](https://cme.h-its.org/exelixis/web/software/exabayes/) which is 'particularly suitable for large-scale analyses on computer clusters'. 
 [Manual](https://cme.h-its.org/exelixis/web/software/exabayes/manual/index.html), [google group](https://groups.google.com/g/exabayes)
 
-# Filtering by parsimony-informative sites
-# Script to count parsimony informative sites and output to csv
-library(phyloch)
-# Setwd where the reads are
-setwd("/home/ngutierrez/array1/Tetraopini/tutorial4_allspp/taxon-sets/no-htesta/mafft-gblocks-50p")
-# Get list of file names and number of files
-listoffiles <- list.files(pattern="*.nex*")
-nooffiles <- length(listoffiles)
-# These are the column names
-record <- c("locusname","pis","length")
-# Loop to calculate PIS and write the PIS info to a text file
-for (j in 1:nooffiles) {
-  write.table((gsub("?","N",(readLines(listoffiles[j])),fixed=TRUE)),"list_of_pis_by_locus.txt",sep="",quote=FALSE,row.names=FALSE,col.names=FALSE)
-  tempfile <- read.nex("list_of_pis_by_locus.txt")
-  templength <- dim(tempfile)[2]
-  temppis <- pis(tempfile)
-  temp <- cbind(listoffiles[j],temppis,templength)
-  record <- rbind(record,temp)
-}
-# Add column names to text file
-write.table(record, "list_of_pis_by_locus.txt",quote=FALSE, row.names=FALSE,col.names=FALSE)
-# Calculate summary data and visualize PIS variables
-par_data <- as.data.frame(read.table("list_of_pis_by_locus.txt", header = TRUE))
-png(filename="name.png")
-plot(par_data$pis)
-# Calculate summary data and visualize PIS variables
-par_data <- as.data.frame(read.table("list_of_pis_by_locus.txt", header = TRUE))
-inform <- subset(par_data, pis >= 80) #subset data set for loci with PIS > 3
-inform <- subset(inform, pis < 150) #remove outliers (change based on obvious outliers to data set)
-png(filename="filter80-150.png")
-plot(inform$pis) #visualize informative loci
-inform_names <- inform$locusname #get locus names of informative loci for locus filtering
-# Write locus names to a file
-write.table(inform_names, file = "inform_names_PIS_80-150.txt",quote=FALSE, row.names=FALSE,col.names=FALSE)
-# Extract filtered loci
-mkdir pars-inf-loci80-150
-cd mafft-gblocks-50p
-for n in $(cat inform_names_PIS_80-150.txt); \
-   do cp "$n" ../pars-inf-loci80-150; \
-done
-# Concatenate alignments
-phyluce_align_concatenate_alignments \
-    --alignments pars-inf-loci80-150 \
-    --output pars-inf-loci80-150-phyl \
-    --log-path log --phylip
-phyluce_align_concatenate_alignments \
-    --alignments pars-inf-loci80-150 \
-    --output pars-inf-loci80-150-nex \
-    --log-path log --nexus
-
 # ExaBayes-1.5.1
 # config file
 #NEXUS
