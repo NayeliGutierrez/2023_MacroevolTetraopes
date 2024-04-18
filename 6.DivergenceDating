@@ -79,11 +79,10 @@ mcmctree mcmctree.ctl
 
 # Convergence Diagnostics, code from Bayesian Molecular Clock Dating Using Genome-Scale Datasets book's tutorial 
 rm(list=ls()) # clean up the workspace
-setwd("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics")
 # Posterior
 # Read in MCMC trace files
-mcmc1 <- read.table("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/mcmc/mcmc1.txt", head=TRUE)
-mcmc2 <- read.table("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/mcmc/mcmc2.txt", head=TRUE)
+mcmc1 <- read.table("~/mcmctree2/Convergence-diagnostics/mcmc/mcmc1.txt", head=TRUE)
+mcmc2 <- read.table("~/mcmctree2/Convergence-diagnostics/mcmc/mcmc2.txt", head=TRUE)
 # Each data frame contains 15 columns:
 # MCMC generation number, 9 node ages (divergence times), 2 mean mutation rates,
 # 2 rate drift coefficients, and sample log-likelihood values
@@ -116,12 +115,10 @@ se.mcmc <- sqrt(var.mcmc / ess.mcmc)
 cbind(mean.mcmc, ess.mcmc, var.mcmc, se.mcmc)
 par(mfrow=c(1,1))
 #pri10s.tree <- ape::read.tree("../data/10s.tree") # does not work with some ape versions
-pri10s.tree <- ape::read.tree("~/Documents/1.PhD_research/2.Second_chapter/3.UCE_extraction/10.divergence_dating/mcmctree2/Convergence-diagnostics/tree.tre")
+pri10s.tree <- ape::read.tree("~/mcmctree2/Convergence-diagnostics/tree.tre")
 bppr::mcmc2densitree(pri10s.tree, mcmc1 * 100, "t_", thin=0.05, col="blue", alpha=0.01, pfrac=0.2)
 title(xlab="Divergence time (Ma)")
 
-# Some phylogentic programs such as BEAST or MrBayes output a list of trees in 
-# Newick format, instead of a table. If you want, you can convert MCMCtree's
 # MCMC output into a list of Newick trees as with BEAST or MrBayes
 pri10s.tree$node.label <- NULL # remove node labels (optional)
 mcmc.trees <- bppr::mcmc2multiphylo(pri10s.tree, mcmc1, "t_", thin=0.05)
