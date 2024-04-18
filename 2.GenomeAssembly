@@ -15,14 +15,13 @@ c2 = gsub("ed/", "ed/clean/", f2 )
 outs = gsub("_CKDL2.*","_spades_vanilla", catted)
 
 # Make Spades commands for denovo assembly then paste them into two different screens and or CPUs
-cmd = paste("/array1/ngutierrez/software/anaconda3/envs/r_env/bin/spades.py -k 21,33,55,77,99,127 --pe1-1 ", c1, " --pe1-2 ", c2, " --pe1-s ", catted, " -o ", outs, " -m 700 -t 16")
+cmd = paste("bin/spades.py -k 21,33,55,77,99,127 --pe1-1 ", c1, " --pe1-2 ", c2, " --pe1-s ", catted, " -o ", outs, " -m 700 -t 16")
 cmd = paste("spades.py -k 21,33,55,77,99,127 --pe1-1 ", c1, " --pe1-2 ", c2, " --pe1-s ", catted, " -o ", outs, " -m 700 -t 16")
 cmd = paste("spades.py -k 21,33,55,77,99,127 --pe1-1 ", c1, " --pe1-2 ", c2, " --pe1-s ", catted, " -o ", outs, " -m 700 -t 16")
 
 # Paste the lines into a screen session e.g. screen -S some_name , to re-enter screen -r some_name
 cmd = cmd[1:10] # for one cpu
 cmd = cmd[11:20] # for the other cpu ... until you have all the assemblies done
-spades.py -k 21,33,55,77,99,127 --pe1-1  /home3/mvandam/Xerces/clean/EL10_CKDL210001104-1a_HFLHVCCX2_L4_1.fq.gz  --pe1-2  /home3/mvandam/Xerces/clean/EL10_CKDL210001104-1a_HFLHVCCX2_L4_2.fq.gz  --pe1-s  /home3/mvandam/Xerces/clean/EL10_CKDL210001104-1a_HFLHVCCX2_L4_unpaired.fq.gz  -o  /home3/mvandam/Xerces/clean/EL10_spades_vanilla  -m 700 -t 36
 
 spades.py -k 21,33,55,77,99,127 --pe1-1  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_1.fq.gz  --pe1-2  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_2.fq.gz  --pe1-s  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_unpaired.fq.gz  -o  /home/ngutierrez/array1/Tetraopini/0.untrimmed/clean/Nayeli_Pool1_spades_vanilla  -m 700 -t 36
 
