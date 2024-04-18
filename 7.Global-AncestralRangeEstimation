@@ -129,7 +129,7 @@ library(phytools)
 # Set your working directory for output files
 # default here is your home directory ("~")
 # Change this as you like
-wd = np("~//Documents/1.PhD_research/2.Second_chapter/3.Phylogenomics/11.ancestral-range-estimation/Lamiinae-runs/Lamiinae-allowed/samerun-diffnames")
+wd = np("~/run-diffnames")
 setwd(wd)
 
 # Double-check your working directory with getwd()
