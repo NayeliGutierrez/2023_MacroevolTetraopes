@@ -29,19 +29,9 @@ phyluce_align_concatenate_alignments \
 	--output random-300-alignments-phylip \
 	--phylip
 
-# Partition finder
-# Prepartition
-cat alignm.nexus | sed 's/uce-/uce_/g' > alignm.nexus.nexus
-python /home/ngutierrez/array1/software/PFinderUCE-SWSC-EN-master/py_script/SWSCEN.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/pre-part/alignm.nexus.nexus
-# Partition finder
-python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/GTR+I+G --raxml -p 80 --rcluster-max 1000 --rcluster-percent 10
-# Then, as indicated in the post I used the 33 partitions to run another PF with these modification: search = greedy;
-python /home/ngutierrez/array1/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/array1/Tetraopini/mcmctree/partition/most-complete-300/partfinder/greedy --raxml -p 80
-
-
 ### MCMCTREE
 # Calibrations distributions in MCMCtreeR
-setwd("/Users/nayeligutierrez/Downloads")
+setwd("Downloads")
 apeTree <- ape::read.tree("astral_nobranchlen.nwk") 
 plot(apeTree, node.width = 0.8)
 nodelabels()
@@ -52,7 +42,7 @@ monophyleticGroups <- tipDes(apeTree, c(43, 40))
 monophyleticGroups
 minimumTimes <- c("node43"=23,"node40"=59.2)
 names(minimumTimes)
-maximumTimes <- c("node43"=24.2, "node40"=124.0) # Lamiinae max age from Nie etal pag4
+maximumTimes <- c("node43"=24.2, "node40"=124.0) 
 names(maximumTimes)
 
 # Uniform distribution for Tetrops fossil and skew normal for Lamiinae
@@ -104,7 +94,7 @@ par(mfrow=c(2,2))
 # Posterior times for run 1 vs run 2:
 plot(t.mean1, t.mean2, main="a) Posterior times, r 1 vs. r 2"); abline(0, 1)
 # Notice that ancient times (t_n11 and t_n12) have small ESS
-# Trace plots are useful to visualise the MCMC and split problems
+# Trace plots are useful to visualize the MCMC and split problems
 plot(mcmc1$t_n43, ty='l', main="b) trace of t_n43")
 plot(mcmc2$t_n43, ty='l', main="c) trace of t_n43")
 plot(density(mcmc1$t_n43), main="d) histogram of t_n43, r 1 vs. r2")
