@@ -1,5 +1,8 @@
 
 ### Preparing the data
+
+# Code from Phyluce tutorials: https://phyluce.readthedocs.io/en/latest/tutorials/
+
 # Alignment of the 300 most complete loci, generate an incomplete matrix in pyluche
 phyluce_align_get_only_loci_with_min_taxa \
     --alignments mafft-gblocks-clean \
