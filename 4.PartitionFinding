@@ -1,16 +1,19 @@
 ```
 # Pre-partitioning data preparation
 # [Entropy-based automatic partitioning](https://github.com/Tagliacollo/PFinderUCE-SWSC-EN)
-# This method uses entropy to attempt to split each UCE into 3 parts - a middle part (which is usually quite conserved), and two flanking regions (which are typically more variable).
+# "This method uses entropy to attempt to split each UCE into 3 parts - 
+# a middle part (which is usually quite conserved), and two flanking regions (which are typically more variable)."
 
-python /home/ngutierrez/array1/software/PFinderUCE-SWSC-EN-master/py_script/SWSCEN.py /home/ngutierrez/array1/Tetraopini/trees/no-htesta/alignment.nexus
+python SWSCEN.py alignment.nexus
 started June 14 17:30 - finished on  =  38:56:21 hours!
 
 # Find the best-fit partitioning scheme
-# From [Entropy-based automatic partitioning' manuals](https://github.com/Tagliacollo/PFinderUCE-SWSC-EN): Now in PF2, we will optimise the partitioning scheme by joining toether similar subsets (e.g. it is often the case that a lot of the central regions are better analysed together than separately).
+# From [Entropy-based automatic partitioning' manuals](https://github.com/Tagliacollo/PFinderUCE-SWSC-EN):
+# "Now in PF2, we will optimize the partitioning scheme by joining together similar subsets (e.g. it is often 
+# the case that a lot of the central regions are better analysed together than separately)."
 # [PartitionFinder](https://www.robertlanfear.com/partitionfinder/)
 
 # Partition Finder
-python /home/ngutierrez/nas4/software/partitionfinder-2.1.1/PartitionFinder.py /home/ngutierrez/nas4/Tetraopini/partitionf/ --raxml -p 80 --rcluster-max 1000 --rcluster-percent 10
+python PartitionFinder.py partitionf/ --raxml -p 80 --rcluster-max 1000 --rcluster-percent 10
 
 ```
